@@ -18,9 +18,10 @@ describe('GET /api/topics', () => {
         .get('/api/topics')
         .expect(200)
         .then(({ body }) => {
-            expect(body.length).toBe(3)
-            expect(Array.isArray(body)).toBe(true)
-            body.forEach((topic) => {
+            console.log(body)
+            expect(body.topics.length).toBe(3)
+            expect(Array.isArray(body.topics)).toBe(true)
+            body.topics.forEach((topic) => {
                 expect(topic).toMatchObject({
                     slug:expect.any(String),
                     description:expect.any(String)
