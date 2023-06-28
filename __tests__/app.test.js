@@ -3,6 +3,7 @@ const app = require('../app.js')
 const db = require('../db/connection.js')
 const seed = require('../db/seeds/seed.js')
 const testData = require('../db/data/test-data')
+const data = require('../endpoints.json')
 
 beforeEach(() => {
     return seed(testData);
@@ -13,12 +14,11 @@ afterAll(() => {
 })
 
 describe('GET /api/topics', () => {
-    test('status 200: should return an array of topics, each of which should have a slug property and a description property', () => {
+    test('status 200: should return contents of endpoints.json', () => {
         return request(app)
         .get('/api/topics')
         .expect(200)
         .then(({ body }) => {
-            console.log(body)
             expect(body.topics.length).toBe(3)
             expect(Array.isArray(body.topics)).toBe(true)
             body.topics.forEach((topic) => {
@@ -28,6 +28,17 @@ describe('GET /api/topics', () => {
                 })
             })
         })
+    })
+})
+
+describe('GET /api', () => {
+    test('status 200: should return an object describing all the available endpoints on this API', () => {
+        return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({ body }) => {
+            expect(body).toEqual(data)
+        }) 
     })
 })
 
