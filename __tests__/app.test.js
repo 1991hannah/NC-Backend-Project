@@ -107,6 +107,63 @@ describe('GET /api/articles', () => {
     })
 })
 
+describe('GET /api/articles/:article_id/comments', () => {
+    test('status 200: should return an array of comment objects for the given article_id, each of which should have the following 6 properties', () => {
+      return request(app)
+      .get('/api/articles/1/comments')
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.comments)).toBe(true)
+        body.comments.forEach((comment) => {
+            expect(comment.article_id).toBe(1)
+            expect(comment).toMatchObject({
+            comment_id:expect.any(Number),
+            votes:expect.any(Number),
+            created_at:expect.any(String),
+            author:expect.any(String),
+            body:expect.any(String)
+        
+          })
+        })
+      })
+    })
+    test('status 200: comments should be sorted in order by date with the newest comment first', () => {
+      return request(app)
+      .get('/api/articles/1/comments')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.comments).toBeSortedBy("created_at", { descending: true });
+      })
+    })
+    test('status 200: article_id for each comment in the array should match the article_id inputed in the api address', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({ body }) => {
+            body.comments.forEach((comment) => {
+                expect(comment.article_id).toEqual(1)
+            })
+        })
+    })
+    test('status 404: should return an error message stating no corresponding comments found, when given an ID of the correct format with no matching comments', () => {
+        return request(app)
+        .get('/api/articles/2/comments')
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe("No comments found for article_id: 2")     
+        })
+    })
+    test.only("status 400: should return an error messafe when given an article_id that isn't valid", () => {
+        return request(app)
+        .get('/api/articles/£/comments')
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("Invalid ID")
+        })
+    })
+  })
+  
+
 describe('all non-existent paths', () => {
     test("404: should return an error message when the path is not found", () => {
         return request(app)
