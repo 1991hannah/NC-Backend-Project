@@ -4,6 +4,7 @@ const db = require('../db/connection.js')
 const seed = require('../db/seeds/seed.js')
 const testData = require('../db/data/test-data')
 const data = require('../endpoints.json')
+const jestSorted = require('jest-sorted')
 
 beforeEach(() => {
     return seed(testData);
@@ -95,6 +96,13 @@ describe('GET /api/articles', () => {
                     comment_count:expect.any(String)
                 })
             })
+        })
+    })
+    test('article objects should be sorted in descending order by date', () => {
+        return request(app)
+        .get('/api/articles')
+        .then(({body}) => {
+            expect(body.articles).toBeSortedBy("created_at", { descending: true });
         })
     })
 })
