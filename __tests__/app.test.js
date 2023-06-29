@@ -76,6 +76,29 @@ describe('GET /api/articles/:article_id', () => {
     })
 })
 
+describe('GET /api/articles', () => {
+    test('status 200: should return an array of article objects sorted by date in descending order, minus the body property', () => {
+        return request(app)
+        .get('/api/articles')
+        .then(({ body }) => {
+            expect(body.articles.length).toBe(13)
+            expect(Array.isArray(body.articles)).toBe(true)
+            body.articles.forEach((article) => {
+                expect(article).toMatchObject({
+                    article_id:expect.any(Number),
+                    title:expect.any(String),
+                    topic:expect.any(String),
+                    author:expect.any(String),
+                    created_at:expect.any(String),
+                    votes:expect.any(Number),
+                    article_img_url:expect.any(String),
+                    comment_count:expect.any(String)
+                })
+            })
+        })
+    })
+})
+
 describe('all non-existent paths', () => {
     test("404: should return an error message when the path is not found", () => {
         return request(app)
