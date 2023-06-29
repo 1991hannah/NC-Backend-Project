@@ -4,6 +4,7 @@ const db = require('../db/connection.js')
 const seed = require('../db/seeds/seed.js')
 const testData = require('../db/data/test-data')
 const data = require('../endpoints.json')
+const jestSorted = require('jest-sorted')
 
 beforeEach(() => {
     return seed(testData);
@@ -72,6 +73,36 @@ describe('GET /api/articles/:article_id', () => {
         .expect(404)
         .then(({ body }) => {
             expect(body.msg).toBe("No article found for article_id: 9999");
+        })
+    })
+})
+
+describe('GET /api/articles', () => {
+    test('status 200: should return an array of article objects sorted by date in descending order, minus the body property', () => {
+        return request(app)
+        .get('/api/articles')
+        .then(({ body }) => {
+            expect(body.articles.length).toBe(13)
+            expect(Array.isArray(body.articles)).toBe(true)
+            body.articles.forEach((article) => {
+                expect(article).toMatchObject({
+                    article_id:expect.any(Number),
+                    title:expect.any(String),
+                    topic:expect.any(String),
+                    author:expect.any(String),
+                    created_at:expect.any(String),
+                    votes:expect.any(Number),
+                    article_img_url:expect.any(String),
+                    comment_count:expect.any(String)
+                })
+            })
+        })
+    })
+    test('article objects should be sorted in descending order by date', () => {
+        return request(app)
+        .get('/api/articles')
+        .then(({body}) => {
+            expect(body.articles).toBeSortedBy("created_at", { descending: true });
         })
     })
 })
