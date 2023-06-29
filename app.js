@@ -17,7 +17,6 @@ app.get('/api', (req, res) => {
 app.get(`/api/articles/:article_id`, getArticleById)
 
 app.all("*", (_, res) => {
-    console.log('hello')
     res.status(404).send({status:404, msg: "Path not found"})
 })
 
