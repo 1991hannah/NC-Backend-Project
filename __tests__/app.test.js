@@ -153,7 +153,7 @@ describe('GET /api/articles/:article_id/comments', () => {
             expect(body.msg).toBe("No comments found for article_id: 2")     
         })
     })
-    test.only("status 400: should return an error messafe when given an article_id that isn't valid", () => {
+    test("status 400: should return an error messafe when given an article_id that isn't valid", () => {
         return request(app)
         .get('/api/articles/£/comments')
         .expect(400)
