@@ -3,13 +3,13 @@ exports.handlePsqlErrors = (err, req, res, next) => {
         res.status(400).send({ msg: "Invalid ID" });
     }
     if (err.code === "23502") {
-        res.status(400).send({ msg: "Request is missing key information"})
+        res.status(400).send({ msg: "Bad Request"})
     }
-    else next(err);
     if (err.code === "23503") {
-        res.status(400).send({ msg: "One or more inputs incorrectly formatted in request"})
+        res.status(404).send({ msg: "Information not found" })
     }
     else next(err);
+
 }
 
 exports.handleCustomErrors = (err, req, res, next) => {

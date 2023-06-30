@@ -65,7 +65,7 @@ describe('GET /api/articles/:article_id', () => {
         .get('/api/articles/NotId')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe("Invalid ID");
+            expect(body.msg).toBe("Bad Request");
         })
     })
     test('status 404: should return an error message stating no corresponding article found, when given an ID of the correct format with no matching article', () => {
@@ -153,12 +153,12 @@ describe('GET /api/articles/:article_id/comments', () => {
             expect(body.msg).toBe("No comments found for article_id: 2")     
         })
     })
-    test("status 400: should return an error messafe when given an article_id that isn't valid", () => {
+    test("status 400: should return an error message when given an article_id that isn't valid", () => {
         return request(app)
         .get('/api/articles/£/comments')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe("Invalid ID")
+            expect(body.msg).toBe("Bad request")
         })
     })
   })
@@ -175,6 +175,9 @@ describe("POST: /api/articles/2/comments", () => {
         .send(data)
         .expect(201)
         .then(({ body }) => {
+            expect(body.comment.article_id).toEqual(2)
+            expect(body.comment.body).toEqual(data.body)
+            expect(body.comment.author).toEqual(data.username)
             expect(body.comment).toMatchObject({
                 article_id:expect.any(Number),
                 author:expect.any(String),
@@ -194,20 +197,20 @@ describe("POST: /api/articles/2/comments", () => {
         .send(data)
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe("Request is missing key information")
+            expect(body.msg).toBe("Bad Request")
         })
     })
-    test("status 400: incorrect data type used for username results in error message", () => {
+    test("status 404: username not in database", () => {
         const data = {
-            username: 123,
+            username: "hannah",
             body: "Great article"
         }
         return request(app)
         .post('/api/articles/2/comments')
         .send(data)
-        .expect(400)
+        .expect(404)
         .then(({ body }) => {
-            expect(body.msg).toBe("One or more inputs incorrectly formatted in request")
+            expect(body.msg).toBe("Information not found")
         })
     })
     test("status 400: no body inputted results in error message", () => {
@@ -219,23 +222,22 @@ describe("POST: /api/articles/2/comments", () => {
         .send(data)
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe("Request is missing key information")
+            expect(body.msg).toBe("Bad Request")
         })
     })
-    test("status 400: valid article id but no corresponding article", () => {
+    test("status 404: valid article id but no corresponding article", () => {
         const data = {
-            body: "Wow fantastic",
+            body: "This is a great article",
             username: "butter_bridge"
         }
         return request(app)
         .post('/api/articles/9999/comments')
         .send(data)
-        .expect(400)
+        .expect(404)
         .then(({ body }) => {
-            expect(body.msg).toBe("One or more inputs incorrectly formatted in request")
+            expect(body.msg).toBe("Information not found")
         })
     })
-
 })
 
 
