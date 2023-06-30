@@ -5,6 +5,7 @@ const seed = require('../db/seeds/seed.js')
 const testData = require('../db/data/test-data')
 const data = require('../endpoints.json')
 const jestSorted = require('jest-sorted')
+const e = require('express')
 
 beforeEach(() => {
     return seed(testData);
@@ -122,7 +123,6 @@ describe('GET /api/articles/:article_id/comments', () => {
             created_at:expect.any(String),
             author:expect.any(String),
             body:expect.any(String)
-        
           })
         })
       })
@@ -162,7 +162,83 @@ describe('GET /api/articles/:article_id/comments', () => {
         })
     })
   })
-  
+
+
+describe("POST: /api/articles/2/comments", () => {
+    test("status 201: should post a comment for an article and respond with the posted comment", () => {
+        const data = {
+            body: "This is a great article",
+            username: "butter_bridge"
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(data)
+        .expect(201)
+        .then(({ body }) => {
+            expect(body.comment).toMatchObject({
+                article_id:expect.any(Number),
+                author:expect.any(String),
+                body:expect.any(String),
+                comment_id:expect.any(Number),
+                created_at:expect.any(String),
+                votes:expect.any(Number)
+            })
+        })
+    })
+    test("status 400: no username inputted results in error message", () => {
+        const data = {
+            body: "This is a great article"
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(data)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("Request is missing key information")
+        })
+    })
+    test("status 400: incorrect data type used for username results in error message", () => {
+        const data = {
+            username: 123,
+            body: "Great article"
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(data)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("One or more inputs incorrectly formatted in request")
+        })
+    })
+    test("status 400: no body inputted results in error message", () => {
+        const data = {
+            username: "butter_bridge"
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(data)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("Request is missing key information")
+        })
+    })
+    test("status 400: valid article id but no corresponding article", () => {
+        const data = {
+            body: "Wow fantastic",
+            username: "butter_bridge"
+        }
+        return request(app)
+        .post('/api/articles/9999/comments')
+        .send(data)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("One or more inputs incorrectly formatted in request")
+        })
+    })
+
+})
+
+
 
 describe('all non-existent paths', () => {
     test("404: should return an error message when the path is not found", () => {
