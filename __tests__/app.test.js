@@ -5,6 +5,7 @@ const seed = require('../db/seeds/seed.js')
 const testData = require('../db/data/test-data')
 const data = require('../endpoints.json')
 const jestSorted = require('jest-sorted')
+const e = require('express')
 
 beforeEach(() => {
     return seed(testData);
@@ -64,7 +65,7 @@ describe('GET /api/articles/:article_id', () => {
         .get('/api/articles/NotId')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe("Invalid ID");
+            expect(body.msg).toBe("Bad Request");
         })
     })
     test('status 404: should return an error message stating no corresponding article found, when given an ID of the correct format with no matching article', () => {
@@ -122,7 +123,6 @@ describe('GET /api/articles/:article_id/comments', () => {
             created_at:expect.any(String),
             author:expect.any(String),
             body:expect.any(String)
-        
           })
         })
       })
@@ -153,16 +153,94 @@ describe('GET /api/articles/:article_id/comments', () => {
             expect(body.msg).toBe("No comments found for article_id: 2")     
         })
     })
-    test("status 400: should return an error messafe when given an article_id that isn't valid", () => {
+    test("status 400: should return an error message when given an article_id that isn't valid", () => {
         return request(app)
         .get('/api/articles/£/comments')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe("Invalid ID")
+            expect(body.msg).toBe("Bad request")
         })
     })
   })
-  
+
+
+describe("POST: /api/articles/2/comments", () => {
+    test("status 201: should post a comment for an article and respond with the posted comment", () => {
+        const data = {
+            body: "This is a great article",
+            username: "butter_bridge"
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(data)
+        .expect(201)
+        .then(({ body }) => {
+            expect(body.comment.article_id).toEqual(2)
+            expect(body.comment.body).toEqual(data.body)
+            expect(body.comment.author).toEqual(data.username)
+            expect(body.comment).toMatchObject({
+                article_id:expect.any(Number),
+                author:expect.any(String),
+                body:expect.any(String),
+                comment_id:expect.any(Number),
+                created_at:expect.any(String),
+                votes:expect.any(Number)
+            })
+        })
+    })
+    test("status 400: no username inputted results in error message", () => {
+        const data = {
+            body: "This is a great article"
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(data)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("Bad Request")
+        })
+    })
+    test("status 404: username not in database", () => {
+        const data = {
+            username: "hannah",
+            body: "Great article"
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(data)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe("Information not found")
+        })
+    })
+    test("status 400: no body inputted results in error message", () => {
+        const data = {
+            username: "butter_bridge"
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(data)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("Bad Request")
+        })
+    })
+    test("status 404: valid article id but no corresponding article", () => {
+        const data = {
+            body: "This is a great article",
+            username: "butter_bridge"
+        }
+        return request(app)
+        .post('/api/articles/9999/comments')
+        .send(data)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe("Information not found")
+        })
+    })
+})
+
+
 
 describe('all non-existent paths', () => {
     test("404: should return an error message when the path is not found", () => {
