@@ -240,6 +240,63 @@ describe("POST: /api/articles/2/comments", () => {
     })
 })
 
+describe("PATCH /api/articles/:article_id", () => {
+    test("status 201: should respond with the article with vote count updated", () => {
+      const data = {
+        inc_votes: 100
+      }
+      return request(app)
+      .patch('/api/articles/3')
+      .send(data)
+      .expect(201)
+      .then(({ body }) => {
+        console.log(body.updatedArticle)
+        expect(body.updatedArticle.article_id).toEqual(3)
+        expect(body.updatedArticle.title).toBe('Eight pug gifs that remind me of mitch')
+        expect(body.updatedArticle.topic).toBe('mitch')
+        expect(body.updatedArticle.author).toBe('icellusedkars')
+        expect(body.updatedArticle.votes).toEqual(data.inc_votes)
+        })
+      })
+    })
+    test("Status 404: Valid article ID but no article found", () => {
+      const data = {
+        inc_votes: 100
+      }
+      return request(app)
+      .patch('/api/articles/9999')
+      .send(data)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Information not found")
+      })
+    })
+    test("Status 400: incorrect datatype in request body", () => {
+      const data = {
+        inc_votes: "strawberries"
+      }
+      return request(app)
+      .patch('/api/articles/3')
+      .send(data)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request")
+      })
+    })
+    test("Status 400: invalid article ID given", () => {
+      const data = {
+        inc_votes: "150"
+      }
+      return request(app)
+      .patch('/api/articles/article1')
+      .send(data)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request")
+      })
+    })
+
+
 
 
 describe('all non-existent paths', () => {
