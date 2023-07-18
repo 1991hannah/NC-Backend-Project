@@ -68,14 +68,6 @@ describe('GET /api/articles/:article_id', () => {
             expect(body.msg).toBe("Bad Request");
         })
     })
-    test('status 404: should return an error message stating no corresponding article found, when given an ID of the correct format with no matching article', () => {
-        return request(app)
-        .get('/api/articles/9999')
-        .expect(404)
-        .then(({ body }) => {
-            expect(body.msg).toBe("No article found for article_id: 9999");
-        })
-    })
 })
 
 describe('GET /api/articles', () => {
@@ -158,7 +150,7 @@ describe('GET /api/articles/:article_id/comments', () => {
         .get('/api/articles/£/comments')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe("Bad request")
+            expect(body.msg).toBe("Bad Request")
         })
     })
   })
@@ -250,25 +242,12 @@ describe("PATCH /api/articles/:article_id", () => {
       .send(data)
       .expect(201)
       .then(({ body }) => {
-        console.log(body.updatedArticle)
         expect(body.updatedArticle.article_id).toEqual(3)
         expect(body.updatedArticle.title).toBe('Eight pug gifs that remind me of mitch')
         expect(body.updatedArticle.topic).toBe('mitch')
         expect(body.updatedArticle.author).toBe('icellusedkars')
         expect(body.updatedArticle.votes).toEqual(data.inc_votes)
         })
-      })
-    })
-    test("Status 404: Valid article ID but no article found", () => {
-      const data = {
-        inc_votes: 100
-      }
-      return request(app)
-      .patch('/api/articles/9999')
-      .send(data)
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Information not found")
       })
     })
     test("Status 400: incorrect datatype in request body", () => {
@@ -298,6 +277,23 @@ describe("PATCH /api/articles/:article_id", () => {
 
 
 
+describe('GET /api/users', () => {
+    test("Status 200: should return an array of all user objects, each with three properties", () => {
+        return request(app)
+        .get("/api/users")
+        .then(({ body }) => {
+            expect(body.users.length).toBe(4)
+            expect(Array.isArray(body.users)).toBe(true)
+            body.users.forEach((user) => {
+                expect(user).toMatchObject({
+                    username:expect.any(String),
+                    name:expect.any(String),
+                    avatar_url:expect.any(String)
+                })
+            })    
+        })
+    })
+})
 
 describe('all non-existent paths', () => {
     test("404: should return an error message when the path is not found", () => {

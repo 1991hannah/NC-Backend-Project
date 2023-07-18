@@ -1,0 +1,8 @@
+const { selectAllUsers } = require("../models/users.models")
+
+exports.getAllUsers = (request, response) => {
+    selectAllUsers()
+    .then((users) => {
+        response.status(200).send({ users })
+    })
+}
