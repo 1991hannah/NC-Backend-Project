@@ -11,7 +11,14 @@ exports.updateVotes = (newVote, article_id) => {
             RETURNING *;
             `,
             [inc_votes, article_id])
-            .then(({ rows }) => rows[0])
-        }
-//         )
-// }
+            .then(({ rows }) => {
+                const article = rows[0];
+            if (!article) {
+                return Promise.reject({
+                    status: 404,
+                    msg: `No article found for article_id: ${article_id}`,
+                });
+            }
+            return article;
+        })
+    };

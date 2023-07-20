@@ -246,7 +246,7 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(body.updatedArticle.title).toBe('Eight pug gifs that remind me of mitch')
         expect(body.updatedArticle.topic).toBe('mitch')
         expect(body.updatedArticle.author).toBe('icellusedkars')
-        expect(body.updatedArticle.votes).toEqual(data.inc_votes)
+        expect(body.updatedArticle.votes).toEqual(100)
         })
       })
     })
@@ -273,6 +273,18 @@ describe("PATCH /api/articles/:article_id", () => {
       .then(({ body }) => {
         expect(body.msg).toBe("Bad Request")
       })
+    })
+    test('status 404: should return an error message stating no corresponding article found, when given an ID of the correct format with no matching article', () => {
+        const data = {
+            inc_votes: "10"
+        }
+        return request(app)
+        .patch('/api/articles/9999')
+        .send(data)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe("No article found for article_id: 9999");
+        })
     })
 
 
